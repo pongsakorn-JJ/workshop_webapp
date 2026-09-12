@@ -1,3 +1,5 @@
+using TodoApi.Dtos;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,7 +16,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/", () => "Hello Todo API");
+var todos = new List <TodoGetDto>
+{
+    new(1, "Learn c", true),
+    new(2, "Learn .net", false),
+    new(3, "Learn web", false)
+};
+
+app.MapGet("/api/todos", () => Results.Ok(todos));
 
 app.Run();
 
