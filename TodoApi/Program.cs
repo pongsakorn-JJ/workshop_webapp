@@ -58,7 +58,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-var todoGroup = app.MapGroup("/api/todos").WithTags("Todos");
+var todoGroup = app
+    .MapGroup("/api/todos")
+    .WithTags("Todos")
+    .RequireAuthorization();
 
 #region In-memory Endpoint
 
@@ -134,6 +137,7 @@ var todoGroup = app.MapGroup("/api/todos").WithTags("Todos");
 #endregion
 
 #region Database Endpoints
+
 todoGroup.MapGet("/", async (AppDbContext db) =>
 {
     var todos = await db.Todo
@@ -149,6 +153,7 @@ todoGroup.MapGet("/", async (AppDbContext db) =>
 
     return todos.Count == 0 ? Results.NotFound() : Results.Ok(todoGetDtos);
 });
+
 todoGroup.MapPost("/", async (AppDbContext db, TodoPostDto dto) =>
 {
     if (string.IsNullOrWhiteSpace(dto.Title))
@@ -176,6 +181,7 @@ todoGroup.MapPost("/", async (AppDbContext db, TodoPostDto dto) =>
 
     return Results.Created($"/api/todos/{todo.Id}", todoGetDto);
 });
+
 #endregion
 
 #region  Authentication Endpoints
