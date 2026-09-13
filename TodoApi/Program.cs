@@ -1,10 +1,18 @@
+using Microsoft.EntityFrameworkCore;
+
 using TodoApi.Dtos;
+using TodoApi.Models;
+using TodoApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
@@ -93,35 +101,35 @@ var todoGroup = app.MapGroup("/api/todos").WithTags("Todos");
 
 #region Database Endpoint
 
-todoGroup.MapGet("/", async (TodoDbContext db) =>
+todoGroup.MapGet("/", async (AppDbContext db) =>
 {
-    var todos = await db.Todos.ToListAsync();
+    var todos = await db.Todo
+        .Select(t => new TodoGetDto(t.Id, t.Title, t.IsCompleted))
+        .ToListAsync();
 
     return todos.Count == 0 ? Results.NotFound() : Results.Ok(todos);
 });
 
-todoPostGroup.MapPost("/", async (AppDbContext db, TodoDbContext dto) =>
+todoGroup.MapPost("/", async (AppDbContext db, TodoPostDto dto) =>
 {
     // read data from the database
-    var lastTodo = await db.Todos.OrderByDescending(t => t.Id).FirstOrDefaultAsync();
+    var lastTodo = await db.Todo.OrderByDescending(t => t.Id).FirstOrDefaultAsync();
     var nextId = lastTodo is null ? 1 : lastTodo.Id + 1;
 
-    var todos = new TodoGetDto
+    var todo = new Todoitem
     {
         Id = nextId,
         Title = dto.Title,
-        IsCompleted = False,
+        IsCompleted = false,
         CreatedAt = DateTime.UtcNow
-
     };
 
-    db.Todos.Add(todos);
+    db.Todo.Add(todo);
     await db.SaveChangesAsync();
 
-    var tosoGetDto = new TodoGetDto(todos.Id,todos.Title,todos.IsCompleted,todos.CreatedAt);
+    var todoGetDto = new TodoGetDto(todo.Id, todo.Title, todo.IsCompleted);
 
-    return Results.Created($"/api/todos/{todos.Id}", todos);
-
+    return Results.Created($"/api/todos/{todo.Id}", todoGetDto);
 });
 
 #endregion
