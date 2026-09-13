@@ -427,3 +427,8 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# SQLite database files (local dev data, recreate with: dotnet ef database update)
+*.db
+*.db-shm
+*.db-wal
