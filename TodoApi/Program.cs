@@ -1,4 +1,3 @@
-
 using TodoApi.Dtos;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,11 +16,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var todos = new List <TodoGetDto>
+var todos = new List<TodoGetDto>
 {
-    new(1, "Learn c", true),
-    new(2, "Learn .net", false),
-    new(3, "Learn web", false)
+    new TodoGetDto(1, "Learn C#", true),
+    new TodoGetDto(2, "Learn ASP.NET Core", false),
+    new TodoGetDto(3, "Build a web API", false)
 };
 
 app.MapGet("/api/todos", () => Results.Ok(todos));
@@ -31,21 +30,37 @@ app.MapGet("/api/todos/{id}", (int id) =>
     var todo = todos.FirstOrDefault(t => t.Id == id);
 
     return todo is not null ? Results.Ok(todo) : Results.NotFound();
+
 });
 
-app.MapPost("/api/todos", (TodoPostDto todoPostDto) =>
+    app.MapPost("/api/todos", (TodoPostDto dto) =>
+    {
+        var nextId = todos.Count == 0 ? 1 : todos.Max(t => t.Id) + 1;
+
+        var todo = new TodoGetDto(nextId, dto.Title, false);
+        todos.Add(todo);
+
+        return Results.Created($"/api/todos/{todo.Id}", todo);
+    });
+
+app.MapPut("/api/todos/{id}", (int id, TodoPutDto dto) =>
 {
-    var nextId = todos.Count == 0 ? 1 : todos.Max(t => t.Id) + 1;
+    try
+    {
+        var index = todos.FindIndex(t => t.Id == id);
+        if (index == -1) return Results.NotFound();
 
-    var todo = new TodoGetDto(nextId, todoPostDto.Title, false);
-    todos.Add(todo);
+        todos[index] = todos[index] with
+        {
+            Title = dto.Title,
+            IsCompleted = dto.IsCompleted 
+        };
 
-    return Results.Created($"/api/todos/{todo.Id}", todo);
+        return Results.Ok(todos[index]);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.Message);
+    }
 });
-
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
