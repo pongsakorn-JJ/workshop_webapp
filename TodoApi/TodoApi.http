@@ -1,6 +1,21 @@
 @TodoApi_HostAddress = http://localhost:5227
 
-GET {{TodoApi_HostAddress}}/weatherforecast/
+### ดูรายการทั้งหมด (ถ้ายังไม่มีข้อมูลจะได้ 404)
+GET {{TodoApi_HostAddress}}/api/todos
 Accept: application/json
 
-###
+### เพิ่มข้อมูลใหม่ (ส่งได้เฉพาะ title)
+POST {{TodoApi_HostAddress}}/api/todos
+Content-Type: application/json
+
+{
+  "title": "อ่านหนังสือ"
+}
+
+### เพิ่มอีกรายการ
+POST {{TodoApi_HostAddress}}/api/todos
+Content-Type: application/json
+
+{
+  "title": "ออกกำลังกาย"
+}
