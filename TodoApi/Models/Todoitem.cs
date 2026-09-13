@@ -1,10 +1,10 @@
-﻿namespace TodoApi.Models;
+namespace TodoApi.Models;
 
 public class Todoitem
 {
-    public int id { get; set; }
-    public string Title { get; set; }
+    public int Id { get; set; }
+    public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public bool MyProperty { get; set; }
+    public bool IsCompleted { get; set; }
     public DateTime CreatedAt { get; set; }
 }
